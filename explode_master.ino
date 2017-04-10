@@ -24,9 +24,12 @@ TM1637Display disp(SEG_CLK, SEG_DIO);
 
 long last_time = 0;
 long time = 0;
-bool button_released;
+int strikes;
 
-int strikes_set = 1;
+bool button_released;
+bool game_over = true;
+
+int strikes_set = 2;
 int number_of_modules;
 
 byte frame[] = {0, // SS byte
@@ -50,16 +53,17 @@ void setup() {
   digitalWrite(RESERVED, HIGH);
   digitalWrite(CLOCK, HIGH);
 
+  delay(1000);
   send_frame(); // Send frame with default values
   number_of_modules = frame[3];
 }
 
 void change_strikes(){
-  if(strikes_set == 3){
-    strikes_set = 1;
+  if(strikes_set == 2){
+    strikes_set = 0;
   }
   else{
-    strikes_set = 3;
+    strikes_set = 2;
   }
 }
 
@@ -91,7 +95,7 @@ void loop() {
   /* SETUP MODE */
   if(digitalRead(KEY) == LOW){
 
-    if(strikes_set == 3){
+    if(strikes_set == 2){
       analogWrite(LED1, 30);
       analogWrite(LED2, 30);
     }
@@ -116,6 +120,7 @@ void loop() {
       button_released = true;
     }
 
+    game_over = false;
   }
 
   /* GAME MODE */
@@ -129,7 +134,6 @@ void loop() {
       frame[1] = 2;
       frame[2] = 0;
       send_frame();
-      game_over = true;
       Serial.println("GAME OVER");
       return;
     }
