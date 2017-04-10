@@ -1,17 +1,31 @@
 #include <TM1637Display.h>
+
+#define min_time 300
+#define max_time 600
+#define steps 15
+#define threshold 5
+
 #define SEG_DIO 8
 #define SEG_CLK 7
 #define BTN 4
 #define POT A0
 #define KEY A1
+#define LED1 5
+#define LED2 6
 
 TM1637Display disp(SEG_CLK, SEG_DIO);
 
+long last_time = 0;
+long time;
+bool button_released;
+
+int strikes_set = 1;
+
 void setup() {
-  // put your setup code here, to run once:
   disp.setBrightness(10);
   pinMode(BTN, INPUT_PULLUP);
   pinMode(KEY, INPUT_PULLUP);
+  Serial.begin(9600);
 }
 
 void loop() {
