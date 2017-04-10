@@ -37,6 +37,31 @@ void loop() {
   /* SETUP MODE */
   if(digitalRead(KEY) == LOW){
 
+    if(strikes_set = 3){
+      analogWrite(LED1, 30);
+      analogWrite(LED2, 30);
+    }
+    else{
+      analogWrite(LED1, 0);
+      analogWrite(LED2, 0);
+    }
+
+    int new_time = (map(analogRead(POT), 1023, 0, min_time, max_time + 10) / steps) * steps;
+    if(abs(new_time - time) > threshold){
+      time = new_time;
+    }
+
+    //Serial.println(time);
+
+    if(digitalRead(BTN) == LOW && button_released){
+      button_released = false;
+      change_strikes();
+      if(strikes_set == 1) Serial.println(strikes_set);
+    }
+    else if(digitalRead(BTN) == HIGH){
+      button_released = true;
+    }
+
   }
 
   /* GAME MODE */
@@ -64,7 +89,7 @@ void loop() {
     // je nutné k pozici 1 přičíst hodnotu 128
 
     analogWrite(6, 30);
-    
+
   }
 
   display_output[0] = disp.encodeDigit((time/60)/10);
