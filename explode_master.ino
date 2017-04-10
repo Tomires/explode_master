@@ -125,6 +125,11 @@ void loop() {
     if(time == 0 && !game_over){
       /* KABOOM! */
       game_over = true;
+      frame[0] = 0; // explosion message
+      frame[1] = 2;
+      frame[2] = 0;
+      send_frame();
+      game_over = true;
       Serial.println("GAME OVER");
       return;
     }
