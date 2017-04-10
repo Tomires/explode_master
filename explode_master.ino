@@ -23,7 +23,7 @@
 TM1637Display disp(SEG_CLK, SEG_DIO);
 
 long last_time = 0;
-long time;
+long time = 0;
 bool button_released;
 
 int strikes_set = 1;
@@ -92,7 +92,17 @@ void loop() {
   /* GAME MODE */
   else{
     delay(1000);
-    time = millis()/1000;
+
+    if(time == 0 && !game_over){
+      /* KABOOM! */
+      game_over = true;
+      Serial.println("GAME OVER");
+      return;
+    }
+
+    else if(time == 0) return;
+
+    time = time - 1;    
     // výpočet číslic pro jednotlivé pozice
     // na displeji pro zobrazení času
     // např. první pozice udává desítky minut
