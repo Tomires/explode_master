@@ -1,3 +1,4 @@
+#include <SPI.h>
 #include <TM1637Display.h>
 
 #define min_time 300
@@ -13,6 +14,12 @@
 #define LED1 5
 #define LED2 6
 
+// SPI pins
+#define LATCH 10
+#define DATA 11
+#define RESERVED 12
+#define CLOCK 13
+
 TM1637Display disp(SEG_CLK, SEG_DIO);
 
 long last_time = 0;
@@ -26,6 +33,15 @@ void setup() {
   pinMode(BTN, INPUT_PULLUP);
   pinMode(KEY, INPUT_PULLUP);
   Serial.begin(9600);
+
+  // SPI setup
+  pinMode(LATCH, OUTPUT);
+  digitalWrite(LATCH, LOW);
+  SPI.begin();
+  digitalWrite(LATCH, HIGH);
+  digitalWrite(DATA, HIGH);
+  digitalWrite(RESERVED, HIGH);
+  digitalWrite(CLOCK, HIGH);
 }
 
 void change_strikes(){
