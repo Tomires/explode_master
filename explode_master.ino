@@ -27,6 +27,13 @@ long time = 0;
 bool button_released;
 
 int strikes_set = 1;
+int number_of_modules;
+
+byte frame[] = {0, // SS byte
+                1, // OPCODE
+                1, // SIZE (modules, serial, battery count, label)
+                1  //    |_ PARAM[0] - number of modules
+                };
 
 void setup() {
   disp.setBrightness(10);
@@ -42,6 +49,9 @@ void setup() {
   digitalWrite(DATA, HIGH);
   digitalWrite(RESERVED, HIGH);
   digitalWrite(CLOCK, HIGH);
+
+  send_frame(); // Send frame with default values
+  number_of_modules = frame[3];
 }
 
 void change_strikes(){
@@ -51,6 +61,25 @@ void change_strikes(){
   else{
     strikes_set = 3;
   }
+}
+
+void send_frame(){
+  /* TEMPORARY SERIAL COMMUNICATION */
+  Serial.println("SENDING A FRAME");
+
+  for (int i = 0; i < 3 + frame[2]; i++) { // 3 + SIZE(PARAM)
+    digitalWrite(LATCH, LOW);
+
+    //frame[i] = SPI.transfer(frame[i]);
+    Serial.println(frame[i]);
+
+    digitalWrite(LATCH, HIGH);
+    delay(100);
+  }
+
+  frame[3] = 3;
+  Serial.print("PARAM[0] = ");\
+  Serial.println(frame[3]);
 }
 
 void loop() {
@@ -102,7 +131,7 @@ void loop() {
 
     else if(time == 0) return;
 
-    time = time - 1;    
+    time = time - 1;
     // výpočet číslic pro jednotlivé pozice
     // na displeji pro zobrazení času
     // např. první pozice udává desítky minut
