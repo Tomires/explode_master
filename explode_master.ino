@@ -28,9 +28,18 @@ void setup() {
   Serial.begin(9600);
 }
 
+void change_strikes(){
+  if(strikes_set == 3){
+    strikes_set = 1;
+  }
+  else{
+    strikes_set = 3;
+  }
+}
+
 void loop() {
-  uint8_t vypis[] = { 0, 0, 0, 0 };
-  // vytvoření proměnné cas a uložení
+  uint8_t display_output[] = { 0, 0, 0, 0 };
+  // vytvoření proměnné time a uložení
   // aktuálního času od zapnutí Arduina
   // v sekundách
 
