@@ -46,7 +46,7 @@ void loop() {
   /* SETUP MODE */
   if(digitalRead(KEY) == LOW){
 
-    if(strikes_set = 3){
+    if(strikes_set == 3){
       analogWrite(LED1, 30);
       analogWrite(LED2, 30);
     }
