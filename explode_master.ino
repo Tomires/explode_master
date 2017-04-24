@@ -14,6 +14,10 @@
 #define LED1 5
 #define LED2 6
 
+// serial pins
+#define RX 0
+#define TX 1
+
 // SPI pins
 #define LATCH 10
 #define DATA 11
@@ -27,6 +31,7 @@ long time = 0;
 int strikes;
 
 bool button_released;
+bool init_sent = false;
 bool game_over = true;
 
 int strikes_set = 2;
@@ -42,20 +47,25 @@ void setup() {
   disp.setBrightness(10);
   pinMode(BTN, INPUT_PULLUP);
   pinMode(KEY, INPUT_PULLUP);
+  
+  pinMode(TX, OUTPUT);
+  pinMode(RX, INPUT);
+  digitalWrite(TX, HIGH);
+  
+  delay(500);
+  digitalWrite(TX, LOW);
+  
   Serial.begin(9600);
 
-  // SPI setup
+  /* SPI setup
   pinMode(LATCH, OUTPUT);
   digitalWrite(LATCH, LOW);
   SPI.begin();
   digitalWrite(LATCH, HIGH);
   digitalWrite(DATA, HIGH);
   digitalWrite(RESERVED, HIGH);
-  digitalWrite(CLOCK, HIGH);
-
-  delay(1000);
-  send_frame(); // Send frame with default values
-  number_of_modules = frame[3];
+  digitalWrite(CLOCK, HIGH);*/
+    
 }
 
 void change_strikes(){
@@ -66,16 +76,32 @@ void change_strikes(){
     strikes_set = 2;
   }
 }
+void send_init(){
+  byte frame[] = {0, // SS byte
+                  1, // OPCODE
+                  1, // SIZE (modules, serial, battery count, label)
+                  1  //    |_ PARAM[0] - number of modules
+                  };
+  
+  send_frame(); // Send frame with default values
+  while(1){ // wait for response
+    if(Serial.available() == 3){
+      Serial.readBytes(frame, 4);
+      number_of_modules = frame[3];
+      break;
+    }
+  }
+}
 
 void send_frame(){
   /* TEMPORARY SERIAL COMMUNICATION */
-  Serial.println("SENDING A FRAME");
+  //Serial.println("SENDING A FRAME");
 
   for (int i = 0; i < 3 + frame[2]; i++) { // 3 + SIZE(PARAM)
     digitalWrite(LATCH, LOW);
 
     //frame[i] = SPI.transfer(frame[i]);
-    Serial.println(frame[i]);
+    //Serial.println(frame[i]);
 
     digitalWrite(LATCH, HIGH);
     delay(100);
@@ -126,6 +152,11 @@ void loop() {
   /* GAME MODE */
   else{
     delay(1000);
+
+    if(!init_sent){
+      send_init();
+      init_sent = true;
+    }
 
     if(time == 0 && !game_over){
       /* KABOOM! */
