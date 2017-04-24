@@ -94,22 +94,9 @@ void send_init(){
 }
 
 void send_frame(){
-  /* TEMPORARY SERIAL COMMUNICATION */
-  //Serial.println("SENDING A FRAME");
-
   for (int i = 0; i < 3 + frame[2]; i++) { // 3 + SIZE(PARAM)
-    digitalWrite(LATCH, LOW);
-
-    //frame[i] = SPI.transfer(frame[i]);
-    //Serial.println(frame[i]);
-
-    digitalWrite(LATCH, HIGH);
-    delay(100);
+    Serial.print(frame[i]);
   }
-
-  frame[3] = 3;
-  Serial.print("PARAM[0] = ");\
-  Serial.println(frame[3]);
 }
 
 void loop() {
@@ -165,7 +152,6 @@ void loop() {
       frame[1] = 2;
       frame[2] = 0;
       send_frame();
-      Serial.println("GAME OVER");
       return;
     }
 
