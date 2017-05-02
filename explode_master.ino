@@ -211,11 +211,27 @@ void loop() {
     if((time == 0 || strikes == strikes_set) && !game_over){
       /* KABOOM! */
       game_over = true;
+      
+      display_output[0] = 0x71; // displays "FAIL"
+      display_output[1] = 0x77;
+      display_output[2] = 0x06;
+      display_output[3] = 0x38;
+      disp.setSegments(display_output);
+      
       send_explosion();
       return;
     }
 
     else if(time == 0) return;
+
+    else if(solved == number_of_modules){
+      display_output[0] = 0x5e; // displays "DONE"
+      display_output[1] = 0x5c;
+      display_output[2] = 0x54;
+      display_output[3] = 0x79;
+      disp.setSegments(display_output);
+      time = 0;
+    }
 
     time = time - 1;
     // výpočet číslic pro jednotlivé pozice
