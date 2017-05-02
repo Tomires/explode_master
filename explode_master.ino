@@ -29,6 +29,7 @@ TM1637Display disp(SEG_CLK, SEG_DIO);
 long last_time = 0;
 long time = 0;
 int strikes;
+int solved;
 
 bool button_released;
 bool init_sent = false;
@@ -93,9 +94,46 @@ void send_init(){
   }
 }
 
+void send_update(){
+  frame[0] = 0;
+  frame[1] = 5; // OPCODE = 5 -> UPDATE
+  frame[2] = 2;
+  frame[3] = strikes;
+  frame[4] = solved;
+  send_frame();
+}
+
+void send_explosion(){
+  frame[0] = 0; // explosion message
+  frame[1] = 2;
+  frame[2] = 0;
+  send_frame();
+}
+
 void send_frame(){
   for (int i = 0; i < 3 + frame[2]; i++) { // 3 + SIZE(PARAM)
     Serial.print(frame[i]);
+  }
+}
+
+void receive_and_send_messages(){
+  if(Serial.available() >= 3){
+    Serial.readBytes(frame, 3);
+    
+    if(frame[1] == 4){ // OPCODE = 4 -> STRIKE
+      strikes++;
+      Serial.readBytes(frame, 1);
+      update_strikes();
+      send_update();
+    }
+    else if(frame[1] == 6){ // OPCODE = 6 -> SOLVED
+      solved++;
+      Serial.readBytes(frame, 1);
+      send_update();
+    }
+    else{ // discard the rest of the message
+      Serial.readBytes(frame, frame[2]);
+    }
   }
 }
 
@@ -154,24 +192,26 @@ void loop() {
     }
 
     game_over = false;
+    init_sent = false;
+    strikes = 0;
   }
 
   /* GAME MODE */
   else{
     delay(1000);
 
+    receive_and_send_messages();
+
     if(!init_sent){
+      update_strikes();
       send_init();
       init_sent = true;
     }
 
-    if(time == 0 && !game_over){
+    if((time == 0 || strikes == strikes_set) && !game_over){
       /* KABOOM! */
       game_over = true;
-      frame[0] = 0; // explosion message
-      frame[1] = 2;
-      frame[2] = 0;
-      send_frame();
+      send_explosion();
       return;
     }
 
