@@ -99,6 +99,26 @@ void send_frame(){
   }
 }
 
+void update_strikes(){
+  if(strikes == 0){
+    analogWrite(LED1, 0);
+    analogWrite(LED2, 0);
+  }
+  else if(strikes == 1 && strikes_set == 3){
+    analogWrite(LED1, 30);
+    analogWrite(LED2, 0);
+  }
+  else if(strikes == 2 || strikes_set == 3){
+    analogWrite(LED1, 30);
+    analogWrite(LED2, 30);
+  }
+  else if(strikes == 3 && strikes_set == 3 
+       || strikes == 1 && strikes_set == 1){
+    analogWrite(LED1, 30);
+    analogWrite(LED2, 30);
+  }
+}
+
 void loop() {
   uint8_t display_output[] = { 0, 0, 0, 0 };
   // vytvoření proměnné time a uložení
