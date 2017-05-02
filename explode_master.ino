@@ -85,7 +85,7 @@ void send_init(){
   
   send_frame(); // Send frame with default values
   while(1){ // wait for response
-    if(Serial.available() == 3){
+    if(Serial.available() == 4){
       Serial.readBytes(frame, 4);
       number_of_modules = frame[3];
       break;
