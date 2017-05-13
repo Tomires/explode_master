@@ -38,6 +38,8 @@ bool game_over = true;
 int strikes_set = 2;
 int number_of_modules;
 
+int something_connected = true;
+
 byte frame[] = {0, // SS byte
                 1, // OPCODE
                 1, // SIZE (modules, serial, battery count, label)
@@ -50,12 +52,15 @@ void setup() {
   pinMode(KEY, INPUT_PULLUP);
   
   pinMode(TX, OUTPUT);
-  pinMode(RX, INPUT);
+  pinMode(RX, INPUT);  
   digitalWrite(TX, HIGH);
+  delay(3000);
   
-  delay(500);
+  if(digitalRead(RX) == LOW){
+    something_connected = false;
+  }
+  
   digitalWrite(TX, LOW);
-  
   Serial.begin(9600);
 
   /* SPI setup
@@ -78,11 +83,10 @@ void change_strikes(){
   }
 }
 void send_init(){
-  byte frame[] = {0, // SS byte
-                  1, // OPCODE
-                  1, // SIZE (modules, serial, battery count, label)
-                  1  //    |_ PARAM[0] - number of modules
-                  };
+  frame[0] = 0; // SS byte
+  frame[1] = 1; // OPCODE
+  frame[2] = 1; // SIZE (modules, serial, battery count, label)
+  frame[3] = 1;  //    |_ PARAM[0] - number of modules
   
   send_frame(); // Send frame with default values
   while(1){ // wait for response
@@ -112,7 +116,7 @@ void send_explosion(){
 
 void send_frame(){
   for (int i = 0; i < 3 + frame[2]; i++) { // 3 + SIZE(PARAM)
-    Serial.print(frame[i]);
+    Serial.write(frame[i]);
   }
 }
 
@@ -202,13 +206,14 @@ void loop() {
 
     receive_and_send_messages();
 
-    if(!init_sent){
+    if(!init_sent && something_connected){
       update_strikes();
       send_init();
       init_sent = true;
+      return;
     }
 
-    if((time == 0 || strikes == strikes_set) && !game_over){
+    if((time == 0 || strikes == strikes_set) && !game_over && init_sent){
       /* KABOOM! */
       game_over = true;
       
